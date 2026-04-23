@@ -1,4 +1,4 @@
-# HR Workflow Designer (React + React Flow)
+# Workflow Designer
 
 A lightweight visual workflow builder for HR processes like onboarding, leave approvals, and document verification. This prototype demonstrates building configurable node-based systems using **React** and **React Flow**, along with mock API simulation and a testing sandbox.
 

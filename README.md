@@ -48,16 +48,25 @@ The project follows a **modular, component-driven architecture** with clear sepa
 ### 2. Component Structure
 
 /components
+
 ├── Canvas (React Flow wrapper)
+
 ├── Sidebar (Node palette)
+
 ├── NodeForm (Dynamic config panel)
+
 ├── SandboxPanel (Simulation logs)
+
 ├── CustomNode (Node renderer)
+
 ├── KVEditor (Reusable key-value editor)
+
 ├── Toggle (Reusable switch)
 
 /utils
+
 ├── nodeFactory (makeNode)
+
 ├── mockApi (mockSimulate)
 
 

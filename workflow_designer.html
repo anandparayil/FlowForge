@@ -1,0 +1,522 @@
+
+<div id="hr-root" style="min-height:700px;font-family:'DM Sans',sans-serif;"></div>
+<link rel="stylesheet" href="https://unpkg.com/reactflow@11.11.4/dist/style.css"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--hr-bg:#f5f4f1;--hr-surface:#ffffff;--hr-border:#e8e6e0;--hr-border2:#d0cdc5;--hr-text:#1a1917;--hr-muted:#7a7870;--hr-accent:#2d5be3;--hr-accent2:#1a3fa0;--hr-start:#0f6e56;--hr-task:#185fa5;--hr-approval:#854f0b;--hr-auto:#533ab7;--hr-end:#a32d2d;--hr-node-w:200px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+#hr-root{background:var(--hr-bg);height:700px;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;border:1px solid var(--hr-border);}
+.hr-topbar{height:48px;background:var(--hr-surface);border-bottom:1px solid var(--hr-border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:10;}
+.hr-logo{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--hr-text);display:flex;align-items:center;gap:6px;}
+.hr-logo-dot{width:8px;height:8px;background:var(--hr-accent);border-radius:50%;}
+.hr-wf-name{font-size:13px;color:var(--hr-muted);border:none;background:transparent;outline:none;font-family:inherit;}
+.hr-wf-name:focus{color:var(--hr-text);}
+.hr-sep{width:1px;height:20px;background:var(--hr-border);margin:0 4px;}
+.hr-btn{height:28px;padding:0 10px;font-size:12px;font-weight:500;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-surface);color:var(--hr-text);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
+.hr-btn:hover{background:var(--hr-bg);border-color:var(--hr-border2);}
+.hr-btn.primary{background:var(--hr-accent);color:#fff;border-color:var(--hr-accent);}
+.hr-btn.primary:hover{background:var(--hr-accent2);}
+.hr-btn.danger{background:#fcebeb;color:#a32d2d;border-color:#f0a0a0;}
+.hr-main{flex:1;display:flex;overflow:hidden;}
+.hr-sidebar{width:200px;flex-shrink:0;background:var(--hr-surface);border-right:1px solid var(--hr-border);display:flex;flex-direction:column;overflow:hidden;}
+.hr-sidebar-sec{padding:12px;border-bottom:1px solid var(--hr-border);}
+.hr-sidebar-label{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--hr-muted);text-transform:uppercase;margin-bottom:8px;}
+.hr-node-pill{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1px solid var(--hr-border);background:var(--hr-bg);cursor:grab;margin-bottom:5px;user-select:none;font-size:12px;font-weight:500;color:var(--hr-text);transition:border-color .15s,box-shadow .15s;}
+.hr-node-pill:hover{border-color:var(--hr-border2);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.hr-node-pill:last-child{margin-bottom:0;}
+.hr-node-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.hr-canvas{flex:1;position:relative;overflow:hidden;}
+.hr-panel{width:260px;flex-shrink:0;background:var(--hr-surface);border-left:1px solid var(--hr-border);display:flex;flex-direction:column;overflow:hidden;}
+.hr-panel-header{padding:12px 14px;border-bottom:1px solid var(--hr-border);font-size:12px;font-weight:600;color:var(--hr-text);display:flex;align-items:center;justify-content:space-between;}
+.hr-panel-body{flex:1;overflow-y:auto;padding:12px;}
+.hr-panel-body::-webkit-scrollbar{width:4px;}
+.hr-panel-body::-webkit-scrollbar-thumb{background:var(--hr-border2);border-radius:4px;}
+.hr-form-row{margin-bottom:10px;}
+.hr-form-label{font-size:11px;font-weight:500;color:var(--hr-muted);margin-bottom:4px;display:block;}
+.hr-form-input{width:100%;height:30px;padding:0 8px;font-size:12px;border:1px solid var(--hr-border);border-radius:6px;background:var(--hr-bg);color:var(--hr-text);font-family:inherit;outline:none;}
+.hr-form-input:focus{border-color:var(--hr-accent);background:#fff;}
+.hr-form-select{width:100%;height:30px;padding:0 8px;font-size:12px;border:1px solid var(--hr-border);border-radius:6px;background:var(--hr-bg);color:var(--hr-text);font-family:inherit;outline:none;}
+.hr-form-textarea{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--hr-border);border-radius:6px;background:var(--hr-bg);color:var(--hr-text);font-family:inherit;outline:none;resize:none;min-height:56px;}
+.hr-form-textarea:focus{border-color:var(--hr-accent);background:#fff;}
+.hr-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.hr-toggle-track{width:28px;height:16px;border-radius:8px;background:var(--hr-border2);position:relative;transition:background .15s;flex-shrink:0;}
+.hr-toggle-track.on{background:var(--hr-start);}
+.hr-toggle-thumb{width:12px;height:12px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .15s;}
+.hr-toggle-track.on .hr-toggle-thumb{left:14px;}
+.hr-toggle-label{font-size:12px;color:var(--hr-text);}
+.hr-kv-row{display:flex;gap:4px;margin-bottom:4px;}
+.hr-kv-input{flex:1;height:26px;padding:0 6px;font-size:11px;border:1px solid var(--hr-border);border-radius:5px;background:var(--hr-bg);color:var(--hr-text);font-family:inherit;outline:none;}
+.hr-kv-input:focus{border-color:var(--hr-accent);}
+.hr-kv-del{width:26px;height:26px;border:1px solid var(--hr-border);border-radius:5px;background:var(--hr-bg);color:var(--hr-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hr-kv-del:hover{background:#fcebeb;color:#a32d2d;border-color:#f0a0a0;}
+.hr-add-link{font-size:11px;color:var(--hr-accent);cursor:pointer;background:none;border:none;padding:0;font-family:inherit;margin-top:2px;}
+.hr-add-link:hover{text-decoration:underline;}
+.hr-sandbox-panel{position:absolute;bottom:0;left:0;right:0;background:var(--hr-surface);border-top:1px solid var(--hr-border);z-index:20;transition:height .25s ease;}
+.hr-sandbox-header{height:36px;display:flex;align-items:center;padding:0 14px;gap:8px;cursor:pointer;border-bottom:1px solid var(--hr-border);}
+.hr-sandbox-title{font-size:12px;font-weight:600;color:var(--hr-text);}
+.hr-sandbox-body{padding:10px 14px;overflow-y:auto;max-height:180px;}
+.hr-sandbox-body::-webkit-scrollbar{width:4px;}
+.hr-sandbox-body::-webkit-scrollbar-thumb{background:var(--hr-border2);border-radius:4px;}
+.hr-log-entry{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--hr-border);font-size:11px;}
+.hr-log-entry:last-child{border-bottom:none;}
+.hr-log-step{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;}
+.hr-log-step.ok{background:#eaf3de;color:#3b6d11;}
+.hr-log-step.err{background:#fcebeb;color:#a32d2d;}
+.hr-log-step.warn{background:#faeeda;color:#854f0b;}
+.hr-log-step.info{background:#e6f1fb;color:#185fa5;}
+.hr-log-text{color:var(--hr-text);line-height:1.4;}
+.hr-log-time{color:var(--hr-muted);font-size:10px;margin-left:auto;white-space:nowrap;}
+.hr-err-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#fcebeb;color:#a32d2d;font-weight:500;}
+.hr-ok-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#eaf3de;color:#3b6d11;font-weight:500;}
+.hr-node-wrap{background:var(--hr-surface);border:1.5px solid var(--hr-border);border-radius:10px;padding:10px 12px;min-width:var(--hr-node-w);max-width:220px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:border-color .15s,box-shadow .15s;position:relative;}
+.hr-node-wrap:hover,.hr-node-wrap.selected{border-color:var(--hr-accent);box-shadow:0 0 0 2px rgba(45,91,227,.15);}
+.hr-node-header{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.hr-node-icon{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.hr-node-title{font-size:12px;font-weight:600;color:var(--hr-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+.hr-node-sub{font-size:10px;color:var(--hr-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hr-node-badge{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:600;position:absolute;top:6px;right:6px;}
+.react-flow__handle{width:8px!important;height:8px!important;background:var(--hr-accent)!important;border:2px solid #fff!important;border-radius:50%!important;}
+.react-flow__edge-path{stroke:var(--hr-border2)!important;stroke-width:1.5!important;}
+.react-flow__edge.selected .react-flow__edge-path{stroke:var(--hr-accent)!important;}
+.react-flow__background{background:var(--hr-bg)!important;}
+.react-flow__controls{box-shadow:none!important;border:1px solid var(--hr-border)!important;border-radius:8px!important;overflow:hidden;}
+.react-flow__controls-button{background:var(--hr-surface)!important;border-bottom:1px solid var(--hr-border)!important;color:var(--hr-text)!important;}
+.react-flow__controls-button:hover{background:var(--hr-bg)!important;}
+.hr-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--hr-muted);gap:6px;}
+.hr-empty-icon{font-size:32px;opacity:.3;}
+.hr-empty-text{font-size:12px;}
+.hr-divider{height:1px;background:var(--hr-border);margin:10px 0;}
+.hr-section-title{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--hr-muted);margin-bottom:8px;}
+.hr-status-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--hr-muted);}
+.hr-status-dot{width:6px;height:6px;border-radius:50%;}
+</style>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/reactflow@11.11.4/dist/umd/index.js"></script>
+<script>
+const {useState,useCallback,useRef,useEffect,useMemo}=React;
+const RF=ReactFlow||window.ReactFlow;
+const {ReactFlowProvider,addEdge,Background,Controls,MiniMap,Handle,Position,useNodesState,useEdgesState,useReactFlow}=RF;
+
+const NODE_TYPES_META={
+  start:{label:'Start',color:'#0f6e56',bg:'#eaf3de',icon:'▶',desc:'Entry point'},
+  task:{label:'Task',color:'#185fa5',bg:'#e6f1fb',icon:'☑',desc:'Human task'},
+  approval:{label:'Approval',color:'#854f0b',bg:'#faeeda',icon:'✓',desc:'Approval step'},
+  auto:{label:'Auto Step',color:'#533ab7',bg:'#eeedfe',icon:'⚡',desc:'Automated action'},
+  end:{label:'End',color:'#a32d2d',bg:'#fcebeb',icon:'■',desc:'Completion'},
+};
+
+const MOCK_AUTOMATIONS=[
+  {id:'send_email',label:'Send Email',params:['to','subject','body']},
+  {id:'generate_doc',label:'Generate Document',params:['template','recipient']},
+  {id:'notify_slack',label:'Slack Notification',params:['channel','message']},
+  {id:'create_ticket',label:'Create JIRA Ticket',params:['project','summary']},
+  {id:'update_hris',label:'Update HRIS Record',params:['employee_id','field','value']},
+];
+
+function mockSimulate(nodes,edges){
+  const sorted=[];
+  const visited=new Set();
+  const adj={};
+  nodes.forEach(n=>adj[n.id]=[]);
+  edges.forEach(e=>adj[e.source]&&adj[e.source].push(e.target));
+  const startNode=nodes.find(n=>n.type==='start');
+  if(!startNode)return{ok:false,steps:[{type:'err',msg:'No Start node found'}]};
+  const hasEnd=nodes.some(n=>n.type==='end');
+  if(!hasEnd)return{ok:false,steps:[{type:'warn',msg:'No End node — workflow may not complete'}]};
+  function dfs(id){
+    if(visited.has(id))return;
+    visited.add(id);
+    sorted.push(id);
+    (adj[id]||[]).forEach(dfs);
+  }
+  dfs(startNode.id);
+  const unreachable=nodes.filter(n=>!visited.has(n.id));
+  const steps=[];
+  sorted.forEach((id,i)=>{
+    const n=nodes.find(x=>x.id===id);
+    if(!n)return;
+    const meta=NODE_TYPES_META[n.type];
+    const delay=Math.floor(Math.random()*800+200);
+    if(n.type==='start')steps.push({type:'info',msg:`Workflow initiated: "${n.data.label||'Untitled'}"`,t:delay});
+    else if(n.type==='task')steps.push({type:'ok',msg:`Task assigned: "${n.data.label||'Task'}" → ${n.data.assignee||'Unassigned'}`,t:delay});
+    else if(n.type==='approval'){
+      const threshold=n.data.autoThreshold;
+      steps.push({type:'ok',msg:`Approval step: "${n.data.label||'Approval'}" — approver: ${n.data.approverRole||'Manager'}${threshold?` (auto-approve if score ≥${threshold})`:''}`,t:delay});
+    }
+    else if(n.type==='auto'){
+      const action=MOCK_AUTOMATIONS.find(a=>a.id===n.data.actionId);
+      steps.push({type:'ok',msg:`Auto action: ${action?action.label:'Unknown'} — ${JSON.stringify(n.data.actionParams||{})}`,t:delay});
+    }
+    else if(n.type==='end')steps.push({type:'ok',msg:`Workflow completed: "${n.data.endMessage||'Done'}"`,t:delay});
+  });
+  if(unreachable.length)steps.push({type:'warn',msg:`${unreachable.length} node(s) unreachable: ${unreachable.map(n=>n.data.label||n.type).join(', ')}`});
+  if(nodes.length<2)steps.push({type:'warn',msg:'Workflow has fewer than 2 nodes'});
+  return{ok:steps.every(s=>s.type!=='err'),steps};
+}
+
+function NodeWrap({selected,type,children}){
+  const meta=NODE_TYPES_META[type]||NODE_TYPES_META.task;
+  return React.createElement('div',{className:'hr-node-wrap'+(selected?' selected':''),style:{borderColor:selected?meta.color:undefined}},children);
+}
+
+function makeNode(type,pos,id){
+  const meta=NODE_TYPES_META[type];
+  const data={label:meta.label,nodeType:type};
+  if(type==='start')Object.assign(data,{metadata:[]});
+  if(type==='task')Object.assign(data,{description:'',assignee:'',dueDate:'',customFields:[]});
+  if(type==='approval')Object.assign(data,{approverRole:'Manager',autoThreshold:''});
+  if(type==='auto')Object.assign(data,{actionId:'send_email',actionParams:{}});
+  if(type==='end')Object.assign(data,{endMessage:'Workflow completed.',summary:false});
+  return{id,type,position:pos,data};
+}
+
+function CustomNode({id,data,selected,type}){
+  const meta=NODE_TYPES_META[type]||NODE_TYPES_META.task;
+  const showSource=type!=='end';
+  const showTarget=type!=='start';
+  return React.createElement('div',{style:{fontFamily:'DM Sans,sans-serif'}},
+    showTarget&&React.createElement(Handle,{type:'target',position:Position.Top,style:{top:-4}}),
+    React.createElement(NodeWrap,{selected,type},
+      React.createElement('div',{className:'hr-node-header'},
+        React.createElement('div',{className:'hr-node-icon',style:{background:meta.bg,color:meta.color}},meta.icon),
+        React.createElement('div',null,
+          React.createElement('div',{className:'hr-node-title'},data.label||meta.label),
+          React.createElement('div',{className:'hr-node-sub'},meta.desc)
+        )
+      ),
+      type==='task'&&data.assignee&&React.createElement('div',{style:{fontSize:10,color:'#185fa5',marginTop:2}},`→ ${data.assignee}`),
+      type==='auto'&&React.createElement('div',{style:{fontSize:10,color:'#533ab7',marginTop:2}},(()=>{
+        const a=MOCK_AUTOMATIONS.find(x=>x.id===data.actionId);
+        return a?a.label:'Auto';
+      })()),
+      type==='approval'&&data.approverRole&&React.createElement('div',{style:{fontSize:10,color:'#854f0b',marginTop:2}},data.approverRole)
+    ),
+    showSource&&React.createElement(Handle,{type:'source',position:Position.Bottom,style:{bottom:-4}})
+  );
+}
+
+const nodeTypes={start:CustomNode,task:CustomNode,approval:CustomNode,auto:CustomNode,end:CustomNode};
+
+function KVEditor({pairs,onChange}){
+  const add=()=>onChange([...(pairs||[]),{k:'',v:''}]);
+  const del=i=>onChange((pairs||[]).filter((_,j)=>j!==i));
+  const upd=(i,field,val)=>{const p=[...(pairs||[])];p[i]={...p[i],[field]:val};onChange(p);};
+  return React.createElement('div',null,
+    (pairs||[]).map((p,i)=>React.createElement('div',{key:i,className:'hr-kv-row'},
+      React.createElement('input',{className:'hr-kv-input',placeholder:'key',value:p.k,onChange:e=>upd(i,'k',e.target.value)}),
+      React.createElement('input',{className:'hr-kv-input',placeholder:'value',value:p.v,onChange:e=>upd(i,'v',e.target.value)}),
+      React.createElement('button',{className:'hr-kv-del',onClick:()=>del(i)},'×')
+    )),
+    React.createElement('button',{className:'hr-add-link',onClick:add},'+ Add field')
+  );
+}
+
+function Toggle({value,onChange,label}){
+  return React.createElement('div',{className:'hr-toggle',onClick:()=>onChange(!value)},
+    React.createElement('div',{className:'hr-toggle-track'+(value?' on':'')},
+      React.createElement('div',{className:'hr-toggle-thumb'})
+    ),
+    React.createElement('span',{className:'hr-toggle-label'},label)
+  );
+}
+
+function NodeForm({node,onChange,onDelete}){
+  if(!node)return React.createElement('div',{className:'hr-empty'},
+    React.createElement('div',{className:'hr-empty-icon'},'☑'),
+    React.createElement('div',{className:'hr-empty-text'},'Select a node to configure')
+  );
+  const {type,data}=node;
+  const meta=NODE_TYPES_META[type]||{};
+  const upd=patch=>onChange({...node,data:{...data,...patch}});
+  const action=MOCK_AUTOMATIONS.find(a=>a.id===data.actionId)||MOCK_AUTOMATIONS[0];
+
+  return React.createElement('div',null,
+    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:12}},
+      React.createElement('div',{style:{width:24,height:24,borderRadius:6,background:NODE_TYPES_META[type]?.bg,color:NODE_TYPES_META[type]?.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12}},meta.icon),
+      React.createElement('div',null,
+        React.createElement('div',{style:{fontSize:12,fontWeight:600,color:'var(--hr-text)'}},meta.label+' Node'),
+        React.createElement('div',{style:{fontSize:10,color:'var(--hr-muted)'}},`ID: ${node.id.slice(0,8)}`)
+      )
+    ),
+    React.createElement('div',{className:'hr-form-row'},
+      React.createElement('label',{className:'hr-form-label'},'Label'),
+      React.createElement('input',{className:'hr-form-input',value:data.label||'',onChange:e=>upd({label:e.target.value})})
+    ),
+    type==='start'&&React.createElement('div',null,
+      React.createElement('div',{className:'hr-section-title',style:{marginTop:8}},'Metadata'),
+      React.createElement(KVEditor,{pairs:data.metadata,onChange:v=>upd({metadata:v})})
+    ),
+    type==='task'&&React.createElement('div',null,
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Description'),
+        React.createElement('textarea',{className:'hr-form-textarea',value:data.description||'',onChange:e=>upd({description:e.target.value}),rows:2})
+      ),
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Assignee'),
+        React.createElement('input',{className:'hr-form-input',placeholder:'e.g. HR Manager',value:data.assignee||'',onChange:e=>upd({assignee:e.target.value})})
+      ),
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Due Date'),
+        React.createElement('input',{className:'hr-form-input',type:'date',value:data.dueDate||'',onChange:e=>upd({dueDate:e.target.value})})
+      ),
+      React.createElement('div',{className:'hr-section-title',style:{marginTop:8}},'Custom Fields'),
+      React.createElement(KVEditor,{pairs:data.customFields,onChange:v=>upd({customFields:v})})
+    ),
+    type==='approval'&&React.createElement('div',null,
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Approver Role'),
+        React.createElement('select',{className:'hr-form-select',value:data.approverRole||'Manager',onChange:e=>upd({approverRole:e.target.value})},
+          ['Manager','HRBP','Director','VP','C-Suite'].map(r=>React.createElement('option',{key:r,value:r},r))
+        )
+      ),
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Auto-Approve Threshold'),
+        React.createElement('input',{className:'hr-form-input',type:'number',placeholder:'Score (0-100)',value:data.autoThreshold||'',onChange:e=>upd({autoThreshold:e.target.value})})
+      )
+    ),
+    type==='auto'&&React.createElement('div',null,
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'Action'),
+        React.createElement('select',{className:'hr-form-select',value:data.actionId||'send_email',onChange:e=>upd({actionId:e.target.value,actionParams:{}})},
+          MOCK_AUTOMATIONS.map(a=>React.createElement('option',{key:a.id,value:a.id},a.label))
+        )
+      ),
+      action&&action.params.length>0&&React.createElement('div',null,
+        React.createElement('div',{className:'hr-section-title',style:{marginTop:6}},'Parameters'),
+        action.params.map(p=>React.createElement('div',{key:p,className:'hr-form-row'},
+          React.createElement('label',{className:'hr-form-label'},p),
+          React.createElement('input',{className:'hr-form-input',placeholder:p,value:(data.actionParams||{})[p]||'',onChange:e=>upd({actionParams:{...(data.actionParams||{}),[p]:e.target.value}})})
+        ))
+      )
+    ),
+    type==='end'&&React.createElement('div',null,
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement('label',{className:'hr-form-label'},'End Message'),
+        React.createElement('textarea',{className:'hr-form-textarea',value:data.endMessage||'',onChange:e=>upd({endMessage:e.target.value}),rows:2})
+      ),
+      React.createElement('div',{className:'hr-form-row'},
+        React.createElement(Toggle,{value:!!data.summary,onChange:v=>upd({summary:v}),label:'Generate summary report'})
+      )
+    ),
+    React.createElement('div',{className:'hr-divider'}),
+    React.createElement('button',{className:'hr-btn danger',style:{width:'100%',justifyContent:'center'},onClick:onDelete},'Delete Node')
+  );
+}
+
+function SandboxPanel({nodes,edges}){
+  const [open,setOpen]=useState(false);
+  const [log,setLog]=useState(null);
+  const [running,setRunning]=useState(false);
+  function run(){
+    setRunning(true);
+    setLog(null);
+    setTimeout(()=>{
+      const result=mockSimulate(nodes,edges);
+      setLog(result);
+      setRunning(false);
+      setOpen(true);
+    },600);
+  }
+  const iconMap={ok:'✓',err:'✕',warn:'!',info:'i'};
+  return React.createElement('div',{className:'hr-sandbox-panel',style:{height:open?220:36}},
+    React.createElement('div',{className:'hr-sandbox-header'},
+      React.createElement('span',{style:{fontSize:10,color:'var(--hr-muted)'}},open?'▼':'▲'),
+      React.createElement('span',{className:'hr-sandbox-title'},'Workflow Sandbox'),
+      log&&React.createElement('span',{className:log.ok?'hr-ok-badge':'hr-err-badge'},log.ok?'PASSED':'ISSUES'),
+      React.createElement('div',{style:{marginLeft:'auto',display:'flex',gap:6}},
+        React.createElement('button',{className:'hr-btn primary',style:{height:24,fontSize:11},onClick:run,disabled:running},running?'Running…':'▶ Run Test'),
+        React.createElement('button',{className:'hr-btn',style:{height:24,fontSize:11},onClick:()=>setOpen(o=>!o)},open?'Hide':'Show')
+      )
+    ),
+    open&&React.createElement('div',{className:'hr-sandbox-body'},
+      !log&&React.createElement('div',{style:{fontSize:11,color:'var(--hr-muted)',textAlign:'center',padding:'20px 0'}},'Click "Run Test" to simulate the workflow'),
+      log&&log.steps.map((s,i)=>React.createElement('div',{key:i,className:'hr-log-entry'},
+        React.createElement('div',{className:`hr-log-step ${s.type}`},iconMap[s.type]),
+        React.createElement('div',{className:'hr-log-text'},s.msg)
+      ))
+    )
+  );
+}
+
+let _id=100;
+const uid=()=>`n${++_id}`;
+
+const INITIAL_NODES=[
+  makeNode('start',{x:240,y:40},'n1'),
+  makeNode('task',{x:120,y:160},'n2'),
+  makeNode('approval',{x:360,y:160},'n3'),
+  makeNode('auto',{x:240,y:290},'n4'),
+  makeNode('end',{x:240,y:420},'n5'),
+];
+INITIAL_NODES[0].data.label='Onboarding Start';
+INITIAL_NODES[1].data.label='Collect Documents';INITIAL_NODES[1].data.assignee='HR Coordinator';
+INITIAL_NODES[2].data.label='Manager Approval';INITIAL_NODES[2].data.approverRole='Manager';
+INITIAL_NODES[3].data.label='Send Welcome Email';INITIAL_NODES[3].data.actionId='send_email';INITIAL_NODES[3].data.actionParams={to:'new_hire@company.com',subject:'Welcome!'};
+INITIAL_NODES[4].data.label='Onboarding Complete';INITIAL_NODES[4].data.endMessage='Employee onboarding complete.';
+
+const INITIAL_EDGES=[
+  {id:'e1',source:'n1',target:'n2',type:'smoothstep'},
+  {id:'e2',source:'n1',target:'n3',type:'smoothstep'},
+  {id:'e3',source:'n2',target:'n4',type:'smoothstep'},
+  {id:'e3b',source:'n3',target:'n4',type:'smoothstep'},
+  {id:'e4',source:'n4',target:'n5',type:'smoothstep'},
+];
+
+function WorkflowName({value,onChange}){
+  const [editing,setEditing]=useState(false);
+  const [val,setVal]=useState(value);
+  if(editing)return React.createElement('input',{className:'hr-wf-name',autoFocus:true,value:val,
+    onChange:e=>setVal(e.target.value),
+    onBlur:()=>{onChange(val);setEditing(false);},
+    onKeyDown:e=>{if(e.key==='Enter'){onChange(val);setEditing(false);}},
+    style:{fontSize:13,fontWeight:500,color:'var(--hr-text)',borderBottom:'1px solid var(--hr-accent)'}
+  });
+  return React.createElement('span',{style:{fontSize:13,fontWeight:500,color:'var(--hr-text)',cursor:'pointer',padding:'2px 4px',borderRadius:4},
+    onClick:()=>setEditing(true),title:'Click to rename'},value||'Untitled Workflow',' ✎');
+}
+
+function App(){
+  const [nodes,setNodes,onNodesChange]=useNodesState(INITIAL_NODES);
+  const [edges,setEdges,onEdgesChange]=useEdgesState(INITIAL_EDGES);
+  const [selectedNode,setSelectedNode]=useState(null);
+  const [wfName,setWfName]=useState('Employee Onboarding');
+  const rfWrapper=useRef(null);
+  const {project}=useReactFlow();
+
+  const onConnect=useCallback(p=>setEdges(eds=>addEdge({...p,type:'smoothstep'},eds)),[]);
+
+  const onNodeClick=useCallback((_,node)=>setSelectedNode(node),[]);
+  const onPaneClick=useCallback(()=>setSelectedNode(null),[]);
+
+  const selectedNodeData=useMemo(()=>nodes.find(n=>n.id===selectedNode?.id),[nodes,selectedNode]);
+
+  const onNodeChange=useCallback(updNode=>{
+    setNodes(ns=>ns.map(n=>n.id===updNode.id?updNode:n));
+    setSelectedNode(updNode);
+  },[]);
+
+  const onDeleteNode=useCallback(()=>{
+    if(!selectedNode)return;
+    setNodes(ns=>ns.filter(n=>n.id!==selectedNode.id));
+    setEdges(es=>es.filter(e=>e.source!==selectedNode.id&&e.target!==selectedNode.id));
+    setSelectedNode(null);
+  },[selectedNode]);
+
+  const onDragOver=useCallback(e=>{e.preventDefault();e.dataTransfer.dropEffect='move';},[]);
+
+  const onDrop=useCallback(e=>{
+    e.preventDefault();
+    const type=e.dataTransfer.getData('nodeType');
+    if(!type||!rfWrapper.current)return;
+    const bounds=rfWrapper.current.getBoundingClientRect();
+    const pos=project({x:e.clientX-bounds.left,y:e.clientY-bounds.top});
+    const id=uid();
+    const newNode=makeNode(type,pos,id);
+    setNodes(ns=>[...ns,newNode]);
+  },[project]);
+
+  const exportJSON=()=>{
+    const data=JSON.stringify({name:wfName,nodes,edges},null,2);
+    const a=document.createElement('a');
+    a.href='data:application/json,'+encodeURIComponent(data);
+    a.download='workflow.json';a.click();
+  };
+
+  const nodeCountByType=useMemo(()=>{
+    const c={};nodes.forEach(n=>c[n.type]=(c[n.type]||0)+1);return c;
+  },[nodes]);
+
+  return React.createElement('div',{style:{height:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{className:'hr-topbar'},
+      React.createElement('div',{className:'hr-logo'},
+        React.createElement('div',{className:'hr-logo-dot'}),
+        'FlowForge'
+      ),
+      React.createElement('div',{className:'hr-sep'}),
+      React.createElement(WorkflowName,{value:wfName,onChange:setWfName}),
+      React.createElement('div',{style:{marginLeft:'auto',display:'flex',gap:6}},
+        React.createElement('button',{className:'hr-btn',onClick:exportJSON},'⬇ Export JSON'),
+        React.createElement('div',{className:'hr-status-row'},
+          React.createElement('div',{className:'hr-status-dot',style:{background:nodes.some(n=>n.type==='start')&&nodes.some(n=>n.type==='end')?'#0f6e56':'#e24b4a'}}),
+          React.createElement('span',{style:{fontSize:11}},
+            nodes.some(n=>n.type==='start')&&nodes.some(n=>n.type==='end')?'Valid':'Incomplete'
+          )
+        )
+      )
+    ),
+    React.createElement('div',{className:'hr-main'},
+      React.createElement('div',{className:'hr-sidebar'},
+        React.createElement('div',{className:'hr-sidebar-sec'},
+          React.createElement('div',{className:'hr-sidebar-label'},'Node Types'),
+          Object.entries(NODE_TYPES_META).map(([type,meta])=>
+            React.createElement('div',{
+              key:type,className:'hr-node-pill',
+              draggable:true,
+              onDragStart:e=>e.dataTransfer.setData('nodeType',type)
+            },
+              React.createElement('div',{className:'hr-node-dot',style:{background:meta.color}}),
+              meta.label
+            )
+          )
+        ),
+        React.createElement('div',{className:'hr-sidebar-sec'},
+          React.createElement('div',{className:'hr-sidebar-label'},'Canvas'),
+          React.createElement('div',{style:{fontSize:11,color:'var(--hr-muted)',lineHeight:1.5}},
+            `${nodes.length} nodes · ${edges.length} edges`),
+          React.createElement('div',{style:{marginTop:8}},
+            Object.entries(nodeCountByType).map(([t,c])=>
+              React.createElement('div',{key:t,style:{display:'flex',alignItems:'center',gap:6,marginBottom:3}},
+                React.createElement('div',{style:{width:6,height:6,borderRadius:3,background:NODE_TYPES_META[t]?.color,flexShrink:0}}),
+                React.createElement('span',{style:{fontSize:11,color:'var(--hr-muted)'}}),
+                React.createElement('span',{style:{fontSize:11,color:'var(--hr-text)'}}),
+                React.createElement('span',{style:{fontSize:11,color:'var(--hr-muted)'}},`${NODE_TYPES_META[t]?.label}: ${c}`)
+              )
+            )
+          )
+        ),
+        React.createElement('div',{className:'hr-sidebar-sec'},
+          React.createElement('div',{className:'hr-sidebar-label'},'Templates'),
+          ['Onboarding','Leave Approval','Doc Verify'].map(t=>
+            React.createElement('div',{key:t,className:'hr-node-pill',style:{cursor:'pointer',fontSize:11}},
+              React.createElement('div',{style:{width:6,height:6,borderRadius:3,background:'var(--hr-accent)',flexShrink:0}}),
+              t
+            )
+          )
+        )
+      ),
+      React.createElement('div',{className:'hr-canvas',ref:rfWrapper},
+        React.createElement(RF.default,{
+          nodes,edges,onNodesChange,onEdgesChange,onConnect,
+          nodeTypes,onNodeClick,onPaneClick,
+          onDragOver,onDrop,
+          fitView:true,
+          defaultEdgeOptions:{type:'smoothstep'},
+          deleteKeyCode:'Delete'
+        },
+          React.createElement(Background,{variant:'dots',gap:16,size:1,color:'#d0cdc5'}),
+          React.createElement(Controls,{style:{bottom:220}})
+        ),
+        React.createElement(SandboxPanel,{nodes,edges})
+      ),
+      React.createElement('div',{className:'hr-panel'},
+        React.createElement('div',{className:'hr-panel-header'},
+          'Node Config',
+          selectedNodeData&&React.createElement('span',{style:{fontSize:10,padding:'2px 6px',borderRadius:4,background:NODE_TYPES_META[selectedNodeData.type]?.bg,color:NODE_TYPES_META[selectedNodeData.type]?.color,fontWeight:600}},
+            NODE_TYPES_META[selectedNodeData.type]?.label
+          )
+        ),
+        React.createElement('div',{className:'hr-panel-body'},
+          React.createElement(NodeForm,{node:selectedNodeData,onChange:onNodeChange,onDelete:onDeleteNode})
+        )
+      )
+    )
+  );
+}
+
+function Root(){
+  return React.createElement(ReactFlowProvider,null,React.createElement(App));
+}
+
+ReactDOM.createRoot(document.getElementById('hr-root')).render(React.createElement(Root));
+</script>
